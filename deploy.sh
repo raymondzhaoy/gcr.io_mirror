@@ -18,10 +18,10 @@ for img in ${imgs[@]}  ; do
             docker pull gcr.io/google-containers/${img}:${tag}
             docker tag gcr.io/google-containers/${img}:${tag} ${user_name}/${img}:${tag}
             docker push ${user_name}/${img}:${tag}
-            docker system prune -f -a
         fi
         echo "gcr.io/google_containers/${img}:${tag} √" >> pub/README.md
     done
+    docker system prune -f -a
 done
 
 cd pub
