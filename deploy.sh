@@ -1,23 +1,34 @@
-curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cookie: SID=WgX93aiB6sVpD_FPLDBsPHvLnYdhtMXYt9bHsf_TmrmIvLkrnc11D84pIcS-3WB9fYIHKw.; HSID=A--M5SxveLfh2e7Jl; SSID=AqvfThGwBO94ONF2d; OSID=ZAX93cIEBWYq35v3hq6J5U3MNU3voHihnEqmrmIirWBfHluQ3Gjbb4E24vDuPoSVKpC2tg.'  -H 'content-type: application/json;charset=UTF-8'   --data-binary '["google-containers",null,null,[]]'  > /tmp/gcr.io
+imgs=$(curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cookie: SID=WgX93aiB6sVpD_FPLDBsPHvLnYdhtMXYt9bHsf_TmrmIvLkrnc11D84pIcS-3WB9fYIHKw.; HSID=A--M5SxveLfh2e7Jl; SSID=AqvfThGwBO94ONF2d; OSID=ZAX93cIEBWYq35v3hq6J5U3MNU3voHihnEqmrmIirWBfHluQ3Gjbb4E24vDuPoSVKpC2tg.'  -H 'content-type: application/json;charset=UTF-8'   --data-binary '["google-containers"]' | grep -P '"' | sed 's/"gcr.ListEntities"//'|cut -d '"' -f2 |sort|uniq)
 
-imgs=$(cat /tmp/gcr.io | grep -P '"' | sed 's/"gcr.ListEntities"//'|cut -d '"' -f2)
+mkdir pub
+echo -e "Total of ${#imgs[@]}'s gcr.io images\n-------\nUseage\n-------\n \`\`\`bash\ndocker pull gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 \n# eq \ndocker pull anjia0532/federation-controller-manager-arm64:v1.3.1-beta.1\n\`\`\`\nImages\n-------\n" > pub/README.md
 
 for img in ${imgs[@]}  ; do
-    tags=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list | jq -r '.tags[]'|sort -r)
-    token=$(curl -ks https://auth.docker.io/token\?service\=registry.docker.io\&scope\=repository:${user_name}/${img}:pull | jq -r '.token')    
-    TAGS=$(curl -ks -H "authorization: Bearer ${token}"  https://registry.hub.docker.com/v2/${user_name}/${img}/tags/list | jq -r '.tags[]'|sort -r)
+    token=$(curl -ks https://auth.docker.io/token\?service\=registry.docker.io\&scope\=repository:${user_name}/${img}:pull | jq -r '.token')
     
-    for tag in $tags
+    gcr_tags=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list | jq -r '.tags[]'|sort -r)
+    
+    hub_tags=$(curl -ks -H "authorization: Bearer ${token}"  https://registry.hub.docker.com/v2/${user_name}/${img}/tags/list | jq -r '.tags[]'|sort -r)
+    
+    for tag in ${gcr_tags}
     do
-        if [ ! -z "${TAGS[@]}" ] && (echo "${TAGS[@]}" | grep -w "${tag}" &>/dev/null); then 
+        if [ ! -z "${hub_tags[@]}" ] && (echo "${hub_tags[@]}" | grep -w "${tag}" &>/dev/null); then 
             echo google_containers/${img}:${tag} exits
         else
-            echo docker pull gcr.io/google-containers/${img}:${tag}
             docker pull gcr.io/google-containers/${img}:${tag}
-            echo docker tag gcr.io/google-containers/${img}:${tag} ${user_name}/${img}:${tag}
             docker tag gcr.io/google-containers/${img}:${tag} ${user_name}/${img}:${tag}
             docker push ${user_name}/${img}:${tag}
             docker system prune -f -a
         fi
+        echo "gcr.io/google_containers/${img}:${tag} √" >> pub/README.md
     done
 done
+
+cd pub
+
+git init
+git config user.name "anjia0532"
+git config user.email "anjia0532@gmail.com"
+git add .
+git commit -m "sync gcr.io's images"
+git push --force --quiet "https://${token}:x-oauth-basic@github.com/anjia0532/gcr.io_mirror.git" master:master
