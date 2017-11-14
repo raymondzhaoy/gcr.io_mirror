@@ -20,8 +20,8 @@ for img in ${imgs[@]}  ; do
             docker push ${user_name}/${img}:${tag}
         fi
         echo "gcr.io/google_containers/${img}:${tag} √\n" >> pub/README.md
+        docker system prune -f -a
     done
-    docker system prune -f -a
 done
 
 cd pub
