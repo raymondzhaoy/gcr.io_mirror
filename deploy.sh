@@ -31,4 +31,4 @@ git config user.name "anjia0532"
 git config user.email "anjia0532@gmail.com"
 git add .
 git commit -m "sync gcr.io's images"
-git push --force --quiet "https://${token}@github.com/anjia0532/gcr.io_mirror.git" master:master
+git push --force --quiet "https://${GH_TOKEN}@github.com/anjia0532/gcr.io_mirror.git" master:master
