@@ -13,14 +13,14 @@ for img in ${imgs[@]}  ; do
     for tag in ${gcr_tags}
     do
         if [ ! -z "${hub_tags[@]}" ] && (echo "${hub_tags[@]}" | grep -w "${tag}" &>/dev/null); then 
-            echo google_containers/${img}:${tag} exits
+            # echo google_containers/${img}:${tag} exits
         else
             docker pull gcr.io/google-containers/${img}:${tag}
             docker tag gcr.io/google-containers/${img}:${tag} ${user_name}/${img}:${tag}
             docker push ${user_name}/${img}:${tag}
         fi
         echo "gcr.io/google_containers/${img}:${tag} √\n" >> pub/README.md
-        docker system prune -f -a
+        docker system prune -f -a >/dev/null
     done
 done
 
@@ -31,4 +31,4 @@ git config user.name "anjia0532"
 git config user.email "anjia0532@gmail.com"
 git add .
 git commit -m "sync gcr.io's images"
-git push --force --quiet "https://${token}:x-oauth-basic@github.com/anjia0532/gcr.io_mirror.git" master:master
+git push --force --quiet "https://${token}@github.com/anjia0532/gcr.io_mirror.git" master:master
