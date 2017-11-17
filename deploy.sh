@@ -1,3 +1,5 @@
+#* 0 * * * /usr/bin/curl -ks "https://api.travis-ci.org/build/301789946/restart" -X POST -H "Origin: https://travis-ci.org"  -H "Travis-API-Version: 3"  -H "Content-Type: application/json; charset=utf-8" -H "Accept: application/json; version=2"  -H "Authorization: token 81Hw6zOaJETS6tu6Fc7grA" > /tmp/mirror.lo
+
 imgs=$(curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cookie: SID=WgX93aiB6sVpD_FPLDBsPHvLnYdhtMXYt9bHsf_TmrmIvLkrnc11D84pIcS-3WB9fYIHKw.; HSID=A--M5SxveLfh2e7Jl; SSID=AqvfThGwBO94ONF2d; OSID=ZAX93cIEBWYq35v3hq6J5U3MNU3voHihnEqmrmIirWBfHluQ3Gjbb4E24vDuPoSVKpC2tg.'  -H 'content-type: application/json;charset=UTF-8'   --data-binary '["google-containers"]' | grep -P '"' | sed 's/"gcr.ListEntities"//'|cut -d '"' -f2 |sort|uniq)
 
 mkdir pub
@@ -24,6 +26,7 @@ for img in ${imgs[@]}  ; do
     done
 done
 
+cp ./LICENSE ./pub/
 cd pub
 
 git init
