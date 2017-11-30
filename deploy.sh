@@ -11,21 +11,16 @@ imgs=$(curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cook
 echo -e "Google Container Registry Mirror [last sync $(date +'%Y-%m-%d %H:%M')]\n-------\n\n[![Sync Status](https://travis-ci.org/anjia0532/gcr.io_mirror.svg?branch=sync)](https://travis-ci.org/anjia0532/gcr.io_mirror)\n\nTotal of $(echo ${imgs[@]} | grep -o ' ' | wc -l)'s gcr.io images\n-------\n\nUseage\n-------\n\n\`\`\`bash\ndocker pull gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 \n# eq \ndocker pull anjia0532/federation-controller-manager-arm64:v1.3.1-beta.1\n\`\`\`\n\nImages\n-------\n\n" > gcr.io_mirror/README.md
 
 for img in ${imgs[@]}  ; do
-
-    gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
+	
+	#img=addon-resizer
     
-    tags=$(${gcr_content} | jq -r '.tags[]'|sort -r)
+	gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
     
-    gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
-    
-    echo mkdir -p gcr.io_mirror/google_containers/${img}
-    mkdir -p gcr.io_mirror/google_containers/${img}
-    
+	mkdir -p gcr.io_mirror/google_containers/${img}
+	
     echo ${gcr_content} | jq -r '.manifest[]|{k: .tag[0],v: .timeUploadedMs} | "touch -amd \"$(date -d @" + .v[0:10] +")\" gcr.io_mirror\/google_containers\/${img}\/"  +.k' | while read i; do
-        echo $i
-	eval $i
+		eval $i
     done
-
 
     new_tags=$(find ./gcr.io_mirror/google_containers/ -mtime -20 -type f -exec basename {} \;)
 
@@ -38,6 +33,7 @@ for img in ${imgs[@]}  ; do
 
     token=$(curl -ks https://auth.docker.io/token\?service\=registry.docker.io\&scope\=repository:${user_name}/${img}:pull | jq -r '.token')
     
+    tags=$(echo ${gcr_content} | jq -r '.tags[]'|sort -r)
     gcr_tags=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list | jq -r '.tags[]'|sort -r)
     
     hub_tags=$(curl -ks -H "authorization: Bearer ${token}"  https://registry.hub.docker.com/v2/${user_name}/${img}/tags/list | jq -r '.tags[]'|sort -r)
