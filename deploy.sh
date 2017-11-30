@@ -1,5 +1,3 @@
-#* 0 * * * /usr/bin/curl -ks "https://api.travis-ci.org/build/301789946/restart" -X POST -H "Origin: https://travis-ci.org"  -H "Travis-API-Version: 3"  -H "Content-Type: application/json; charset=utf-8" -H "Accept: application/json; version=2"  -H "Authorization: token 81Hw6zOaJETS6tu6Fc7grA" > /tmp/mirror.lo
-
 git config user.name "anjia0532"
 git config user.email "anjia0532@gmail.com"
 
@@ -12,17 +10,17 @@ echo -e "Google Container Registry Mirror [last sync $(date +'%Y-%m-%d %H:%M')]\
 
 for img in ${imgs[@]}  ; do
 	
-	#img=addon-resizer
+    #img=addon-resizer
     
-	gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
+    gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
     
-	mkdir -p gcr.io_mirror/google_containers/${img}
+    mkdir -p gcr.io_mirror/google_containers/${img}
 	
     echo ${gcr_content} | jq -r '.manifest[]|{k: .tag[0],v: .timeUploadedMs} | "touch -amd \"$(date -d @" + .v[0:10] +")\" gcr.io_mirror\/google_containers\/${img}\/"  +.k' | while read i; do
-		eval $i
+	eval $i
     done
 
-    new_tags=$(find ./gcr.io_mirror/google_containers/ -mtime -20 -type f -exec basename {} \;)
+    new_tags=$(find ./gcr.io_mirror/google_containers/ -mtime -16 -type f -exec basename {} \;)
 
     for tag in ${new_tags[@]};do
         docker pull gcr.io/google-containers/${img}:${tag}
