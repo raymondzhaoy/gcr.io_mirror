@@ -11,7 +11,7 @@ for img in ${imgs[@]}  ; do
     
     gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
     
-    if [ ! test -d gcr.io_mirror/google_containers/${img} ] ; then  
+    if [ ! -d gcr.io_mirror/google_containers/${img} ] ; then  
         echo "new Image:" gcr.io/google-containers/${img} > gcr.io_mirror/google_containers/${img}/README.md
     fi
     
