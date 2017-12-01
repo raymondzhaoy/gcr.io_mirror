@@ -1,7 +1,7 @@
 git config user.name "anjia0532"
 git config user.email "anjia0532@gmail.com"
 git clone "https://${GH_TOKEN}@github.com/anjia0532/gcr.io_mirror.git"
-
+user_name=anjia0532
 
 imgs=$(curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cookie: SID=WgX93aiB6sVpD_FPLDBsPHvLnYdhtMXYt9bHsf_TmrmIvLkrnc11D84pIcS-3WB9fYIHKw.; HSID=A--M5SxveLfh2e7Jl; SSID=AqvfThGwBO94ONF2d; OSID=ZAX93cIEBWYq35v3hq6J5U3MNU3voHihnEqmrmIirWBfHluQ3Gjbb4E24vDuPoSVKpC2tg.'  -H 'content-type: application/json;charset=UTF-8'   --data-binary '["google-containers"]' | grep -P '"' | sed 's/"gcr.ListEntities"//'|cut -d '"' -f2 |sort|uniq)
 
@@ -11,8 +11,7 @@ for img in ${imgs[@]}  ; do
     
     gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
     
-    if [ ! -d gcr.io_mirror/google_containers/${img} ] ; then
-        mkdir -p gcr.io_mirror/google_containers/${img}
+    if [ ! test -d gcr.io_mirror/google_containers/${img} ] ; then  
         echo "new Image:" gcr.io/google-containers/${img} > gcr.io_mirror/google_containers/${img}/README.md
     fi
     
