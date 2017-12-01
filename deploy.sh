@@ -54,7 +54,7 @@ for img in ${imgs[@]}  ; do
     
     echo -e "gcr.io/google_containers/${img} √\n" >> gcr.io_mirror/README.md
 done
-
+cd gcr.io_mirror
 git add .
 git commit -m "sync gcr.io's images"
 git push --quiet "https://${GH_TOKEN}@github.com/anjia0532/gcr.io_mirror.git" master:master
