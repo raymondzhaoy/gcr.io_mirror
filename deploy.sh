@@ -9,11 +9,12 @@ echo -e "Google Container Registry Mirror [last sync $(date +'%Y-%m-%d %H:%M')]\
 
 for img in ${imgs[@]}  ; do
     gcr_content=$(curl -ks -X GET https://gcr.io/v2/google_containers/${img}/tags/list)
-    
+        
     if [ ! -d gcr.io_mirror/google_containers/${img} ] ; then
         mkdir -p gcr.io_mirror/google_containers/${img}
-        echo -e gcr.io/google-containers/${img} "\n\n----" > gcr.io_mirror/google_containers/${img}/README.md
     fi
+    
+    echo -e "[gcr.io/google-containers/${img}](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n----" > gcr.io_mirror/google_containers/${img}/README.md
     
     echo ${gcr_content} | jq -r '.manifest[]|{k: .tag[0],v: .timeUploadedMs} | "touch -amd \"$(date -d @" + .v[0:10] +")\" gcr.io_mirror\/google_containers\/${img}\/"  +.k' | while read i; do
         eval $i
@@ -28,7 +29,7 @@ for img in ${imgs[@]}  ; do
         
         docker push ${user_name}/${img}:${tag}
         
-        echo -e "**gcr.io/google_containers/${img}:${tag} updated**\n" >> gcr.io_mirror/google_containers/${img}/README.md
+        echo -e "**[gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/)**\n" >> gcr.io_mirror/google_containers/${img}/README.md
     done
 
     token=$(curl -ks https://auth.docker.io/token\?service\=registry.docker.io\&scope\=repository:${user_name}/${img}:pull | jq -r '.token')
@@ -48,11 +49,11 @@ for img in ${imgs[@]}  ; do
             docker tag gcr.io/google-containers/${img}:${tag} ${user_name}/${img}:${tag}
             docker push ${user_name}/${img}:${tag}
         fi
-        echo -e "gcr.io/google_containers/${img}:${tag} √\n" >> gcr.io_mirror/google_containers/${img}/README.md
+        echo -e "[gcr.io/google_containers/${img}:${tag} √](https://hub.docker.com/r/anjia0532/${img}/tags/)\n" >> gcr.io_mirror/google_containers/${img}/README.md
         docker system prune -f -a
     done
     
-    echo -e "gcr.io/google_containers/${img} √\n" >> gcr.io_mirror/README.md
+    echo -e "[gcr.io/google_containers/${img} √](https://hub.docker.com/r/anjia0532/${img}/tags/)\n" >> gcr.io_mirror/README.md
 done
 cd gcr.io_mirror
 git add .
