@@ -11,8 +11,8 @@ imgs=$(curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cook
 echo -e "Google Container Registry Mirror [last sync $(date +'%Y-%m-%d %H:%M') UTC]\n-------\n\n[![Sync Status](https://travis-ci.org/anjia0532/gcr.io_mirror.svg?branch=sync)](https://travis-ci.org/anjia0532/gcr.io_mirror)\n\nTotal of $(echo ${imgs[@]} | grep -o ' ' | wc -l)'s gcr.io images\n-------\n\nUseage\n-------\n\n\`\`\`bash\ndocker pull gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 \n# eq \ndocker pull anjia0532/federation-controller-manager-arm64:v1.3.1-beta.1\n\`\`\`\n\n[Changelog](./CHANGES.md)\n-------\n\nImages\n-------\n\n" > gcr.io_mirror/README.md
 
 # create changelog md
-if [ ! -f gcr.io_mirror/CHANGES.md ]; then
-    touch gcr.io_mirror/CHANGES.md
+if [ ! -s gcr.io_mirror/CHANGES.md ]; then
+    echo -e "\n" > gcr.io_mirror/CHANGES.md
 fi
 
 # sync branch tmp changelog md
@@ -51,7 +51,7 @@ for img in ${imgs[@]}  ; do
         docker push ${user_name}/${img}:${tag}
         
         # write this to changelogs
-        echo -e "1. [[gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n----" >> CHANGES.md
+        echo -e "1. [[gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n" >> CHANGES.md
         
         # image readme.md
         echo -e "**[gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/)**\n" >> gcr.io_mirror/google_containers/${img}/README.md
@@ -87,7 +87,7 @@ for img in ${imgs[@]}  ; do
 done
 
 if [ -f CHANGES.md ]; then
-    sed "1i ## $(date +%Y-%m-%d) \n$(cat CHANGES.md)" gcr.io_mirror/CHANGES.md
+    sed -i "1i ## $(date +%Y-%m-%d) \n$(cat CHANGES.md)" gcr.io_mirror/CHANGES.md
 fi
 
 cd gcr.io_mirror
