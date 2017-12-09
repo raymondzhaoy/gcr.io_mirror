@@ -87,7 +87,7 @@ for img in ${imgs[@]}  ; do
 done
 
 if [ -f CHANGES.md ]; then
-    sed -i "1i ## $(date +%Y-%m-%d) \n$(cat CHANGES.md)" gcr.io_mirror/CHANGES.md
+    (cat CHANGES.md && cat gcr.io_mirror/CHANGES.md) > gcr.io_mirror/CHANGES1.md && mv gcr.io_mirror/CHANGES1.md gcr.io_mirror/CHANGES.md
 fi
 
 cd gcr.io_mirror
