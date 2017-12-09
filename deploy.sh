@@ -51,7 +51,7 @@ for img in ${imgs[@]}  ; do
         docker push ${user_name}/${img}:${tag}
         
         # write this to changelogs
-        echo -e "1. [[gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n" >> CHANGES.md
+        echo -e "1. [gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n" >> CHANGES.md
         
         # image readme.md
         echo -e "**[gcr.io/google_containers/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/)**\n" >> gcr.io_mirror/google_containers/${img}/README.md
@@ -87,7 +87,7 @@ for img in ${imgs[@]}  ; do
 done
 
 if [ -f CHANGES.md ]; then
-    (cat CHANGES.md && cat gcr.io_mirror/CHANGES.md) > gcr.io_mirror/CHANGES1.md && mv gcr.io_mirror/CHANGES1.md gcr.io_mirror/CHANGES.md
+    (echo -e "## $(date +%Y-%m-%d) \n" && cat CHANGES.md && cat gcr.io_mirror/CHANGES.md) > gcr.io_mirror/CHANGES1.md && mv gcr.io_mirror/CHANGES1.md gcr.io_mirror/CHANGES.md
 fi
 
 cd gcr.io_mirror
