@@ -86,7 +86,7 @@ for img in ${imgs[@]}  ; do
     echo -e "[gcr.io/google_containers/${img} √](https://hub.docker.com/r/anjia0532/${img}/tags/)\n" >> gcr.io_mirror/README.md
 done
 
-if [ -f CHANGES.md ]; then
+if [ -s CHANGES.md ]; then
     (echo -e "## $(date +%Y-%m-%d) \n" && cat CHANGES.md && cat gcr.io_mirror/CHANGES.md) > gcr.io_mirror/CHANGES1.md && mv gcr.io_mirror/CHANGES1.md gcr.io_mirror/CHANGES.md
 fi
 
