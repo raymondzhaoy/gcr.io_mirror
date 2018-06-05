@@ -5,7 +5,47 @@ git config user.email "anjia0532@gmail.com"
 git clone "https://github.com/anjia0532/gcr.io_mirror.git"
 
 # init README.md
-echo -e "Google Container Registry Mirror [last sync $(date +'%Y-%m-%d %H:%M') UTC]\n-------\n\n[![Sync Status](https://travis-ci.org/anjia0532/gcr.io_mirror.svg?branch=sync)](https://travis-ci.org/anjia0532/gcr.io_mirror)\n\nUseage\n-------\n\n\`\`\`bash\ndocker pull gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 \n# eq \ndocker pull anjia0532/federation-controller-manager-arm64:v1.3.1-beta.1\n\`\`\`\n\n[Changelog](./CHANGES.md)\n-------\n\nImages\n-------" > gcr.io_mirror/README.md
+cat <<EOT >> gcr.io_mirror/README.md
+Google Container Registry Mirror [last sync 2018-06-05 12:28 UTC]
+-------
+
+[![Sync Status](https://travis-ci.org/anjia0532/gcr.io_mirror.svg?branch=sync)](https://travis-ci.org/anjia0532/gcr.io_mirror)
+
+Syntax
+-------
+```bash
+gcr.io/namespace/image_name:image_tag eq ${user_name}/namespace.image_name:image_tag
+```
+Example
+-------
+
+```bash
+docker pull gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 
+# eq 
+docker pull ${user_name}/google-containers.federation-controller-manager-arm64:v1.3.1-beta.1
+```
+
+ReTag ${user_name} images to gcr.io 
+-------
+```bash
+# replace gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 to real image
+# this will convert gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1 
+# to ${user_name}/google-containers.federation-controller-manager-arm64:v1.3.1-beta.1 and pull 
+eval $(echo $(cat <<EOF
+gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1
+gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1
+gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1
+EOF
+)| sed 's/gcr\.io/${user_name}/g;s/\//\./g;s/ /\n/g;s/${user_name}\./${user_name}\//g' | uniq | awk '{print "docker pull "$1";"}')
+
+# this code will retag all of ${user_name}'s image from local  e.g. ${user_name}/google-containers.federation-controller-manager-arm64:v1.3.1-beta.1 
+# to gcr.io/google-containers/federation-controller-manager-arm64:v1.3.1-beta.1
+eval $(docker images | grep ${user_name} | awk '{print $1":"$2}' |awk -F'[/.:]' '{printf "docker tag %s/%s.%s:%s gcr.io/%s/%s:%s;\n",$1,$2,$3,$4,$2,$3,$4}')
+```
+
+[Changelog](./CHANGES.md)
+-------
+EOT
 
 # create changelog md
 if [ ! -s gcr.io_mirror/CHANGES.md ]; then
@@ -23,7 +63,12 @@ for n in ${ns[@]}  ; do
 
     # get all of the gcr images
     imgs=$(curl -ks 'https://console.cloud.google.com/m/gcr/entities/list'  -H 'cookie: SID=WgX93aiB6sVpD_FPLDBsPHvLnYdhtMXYt9bHsf_TmrmIvLkrnc11D84pIcS-3WB9fYIHKw.; HSID=A--M5SxveLfh2e7Jl; SSID=AqvfThGwBO94ONF2d; OSID=ZAX93cIEBWYq35v3hq6J5U3MNU3voHihnEqmrmIirWBfHluQ3Gjbb4E24vDuPoSVKpC2tg.'  -H 'content-type: application/json;charset=UTF-8'   --data-binary '["'${n}'"]' | grep -P '"' | sed 's/"gcr.ListEntities"//'|cut -d '"' -f2 |sort|uniq)
-    echo -e "\n\nTotal of $(echo ${imgs[@]} | grep -o ' ' | wc -l)'s gcr.io/${n}/* images\n-------\n\n" >> gcr.io_mirror/README.md
+	cat <<EOT >> gcr.io_mirror/README.md
+
+	Total of $(echo ${imgs[@]} | grep -o ' ' | wc -l)'s gcr.io/${n}/* images
+	-------
+
+	EOT
     # remove all of the imgs tmp file
     rm -rf "gcr.io_mirror/${n}/*"
 
@@ -37,8 +82,9 @@ for n in ${ns[@]}  ; do
         fi
         
         # create image README.md
+		
+        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n----" >> gcr.io_mirror/${n}/README.md
         echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n----" > gcr.io_mirror/${n}/${img}/README.md
-        
         # create img tmp file,named by tag's name, set access's time,modify's time by this image manifest's timeUploadedMs
         echo ${gcr_content} | jq -r '.manifest[]|{k: .tag[0],v: .timeUploadedMs} | "touch -amd \"$(date -d @" + .v[0:10] +")\" gcr.io_mirror\/${n}\/${img}\/"  +.k' | while read i; do
             eval $i
@@ -55,10 +101,10 @@ for n in ${ns[@]}  ; do
             docker push ${user_name}/${img}:${tag}
             
             # write this to changelogs
-            echo -e "1. [gcr.io/${n}/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n" >> CHANGES.md
+            echo -e "1. [gcr.io/${n}/${img}:${tag} updated](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/) \n\n" >> CHANGES.md
             
             # image readme.md
-            echo -e "**[gcr.io/${n}/${img}:${tag} updated](https://hub.docker.com/r/anjia0532/${img}/tags/)**\n" >> gcr.io_mirror/${n}/${img}/README.md
+            echo -e "**[gcr.io/${n}/${img}:${tag} updated](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/)**\n" >> gcr.io_mirror/${n}/${img}/README.md
         done
 
         # docker hub pull's token
@@ -81,13 +127,14 @@ for n in ${ns[@]}  ; do
                 docker push ${user_name}/${img}:${tag}
             fi
             # old img tag write to image's readme.md
-            echo -e "[gcr.io/${n}/${img}:${tag} √](https://hub.docker.com/r/anjia0532/${img}/tags/)\n" >> gcr.io_mirror/${n}/${img}/README.md
+            echo -e "[gcr.io/${n}/${img}:${tag} √](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/)\n" >> gcr.io_mirror/${n}/${img}/README.md
+            echo -e "[gcr.io/${n}/${img}:${tag} √](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/)\n" >> gcr.io_mirror/${n}/README.md
             
             # cleanup the docker file
             docker system prune -f -a
         done
         
-        echo -e "[gcr.io/${n}/${img} √](https://hub.docker.com/r/anjia0532/${img}/tags/)\n" >> gcr.io_mirror/README.md
+        echo -e "[gcr.io/${n}/${img} √](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/)\n" >> gcr.io_mirror/README.md
     done
 done
 if [ -s CHANGES.md ]; then
@@ -97,6 +144,6 @@ fi
 cd gcr.io_mirror
 git add .
 git commit -m "sync gcr.io's images at $(date +'%Y-%m-%d %H:%M')"
-git push --quiet "https://${GH_TOKEN}@github.com/anjia0532/gcr.io_mirror.git" master:master
+git push --quiet "https://${GH_TOKEN}@github.com/${user_name}/gcr.io_mirror.git" master:master
 
 exit 0
