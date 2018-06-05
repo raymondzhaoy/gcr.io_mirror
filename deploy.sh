@@ -5,7 +5,7 @@ git config user.email "anjia0532@gmail.com"
 git clone "https://github.com/anjia0532/gcr.io_mirror.git"
 
 # init README.md
-cat <<EOT >> gcr.io_mirror/README.md
+cat > gcr.io_mirror/README.md <<EOT
 Google Container Registry Mirror [last sync 2018-06-05 12:28 UTC]
 -------
 
