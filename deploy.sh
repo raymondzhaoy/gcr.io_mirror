@@ -111,13 +111,13 @@ for n in ${ns[@]}  ; do
         done
 
         # docker hub pull's token
-        token=$(curl -ks https://auth.docker.io/token\?service\=registry.docker.io\&scope\=repository:${user_name}/${img}:pull | jq -r '.token')
+        token=$(curl -ks https://auth.docker.io/token\?service\=registry.docker.io\&scope\=repository:${user_name}/${n}.${img}:pull | jq -r '.token')
         
         # get this gcr image's tags
         gcr_tags=$(echo ${gcr_content} | jq -r '.tags[]'|sort -r)
         
         # get this docker hub image's tags
-        hub_tags=$(curl -ks -H "authorization: Bearer ${token}"  https://registry.hub.docker.com/v2/${user_name}/${img}/tags/list | jq -r '.tags[]'|sort -r)
+        hub_tags=$(curl -ks -H "authorization: Bearer ${token}"  https://registry.hub.docker.com/v2/${user_name}/${n}.${img}/tags/list | jq -r '.tags[]'|sort -r)
         
         for tag in ${gcr_tags}
         do
