@@ -83,9 +83,11 @@ for n in ${ns[@]}  ; do
         fi
         
         # create image README.md
+        # create image README.md
 		
-        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n----" >> gcr.io_mirror/${n}/README.md
-        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/anjia0532/${img}/tags/) \n\n----" > gcr.io_mirror/${n}/${img}/README.md
+        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/${user_name}/${img}/tags/) \n\n----" >> gcr.io_mirror/${n}/README.md
+        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/${user_name}/${img}/tags/) \n\n----" > gcr.io_mirror/${n}/${img}/README.md
+		
         # create img tmp file,named by tag's name, set access's time,modify's time by this image manifest's timeUploadedMs
         echo ${gcr_content} | jq -r '.manifest[]|{k: .tag[0],v: .timeUploadedMs} | "touch -amd \"$(date -d @" + .v[0:10] +")\" gcr.io_mirror\/${n}\/${img}\/"  +.k' | while read i; do
             eval $i
@@ -97,9 +99,9 @@ for n in ${ns[@]}  ; do
         for tag in ${new_tags[@]};do
             docker pull gcr.io/${n}/${img}:${tag}
             
-            docker tag gcr.io/${n}/${img}:${tag} ${user_name}/${img}:${tag}
+            docker tag gcr.io/${n}/${img}:${tag} ${user_name}/${n}.${img}:${tag}
             
-            docker push ${user_name}/${img}:${tag}
+            docker push ${user_name}/${n}.${img}:${tag}
             
             # write this to changelogs
             echo -e "1. [gcr.io/${n}/${img}:${tag} updated](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/) \n\n" >> CHANGES.md
@@ -124,8 +126,8 @@ for n in ${ns[@]}  ; do
                  echo ${n}/${img}:${tag} exits
             else
                 docker pull gcr.io/${n}/${img}:${tag}
-                docker tag gcr.io/${n}/${img}:${tag} ${user_name}/${img}:${tag}
-                docker push ${user_name}/${img}:${tag}
+                docker tag gcr.io/${n}/${img}:${tag} ${user_name}/${n}.${img}:${tag}
+                docker push ${user_name}/${n}.${img}:${tag}
             fi
             # old img tag write to image's readme.md
             echo -e "[gcr.io/${n}/${img}:${tag} √](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/)\n" >> gcr.io_mirror/${n}/${img}/README.md
@@ -138,6 +140,7 @@ for n in ${ns[@]}  ; do
         echo -e "[gcr.io/${n}/${img} √](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/)\n" >> gcr.io_mirror/README.md
     done
 done
+
 if [ -s CHANGES.md ]; then
     (echo -e "## $(date +%Y-%m-%d) \n" && cat CHANGES.md && cat gcr.io_mirror/CHANGES.md) > gcr.io_mirror/CHANGES1.md && mv gcr.io_mirror/CHANGES1.md gcr.io_mirror/CHANGES.md
 fi
