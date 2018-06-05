@@ -85,8 +85,8 @@ for n in ${ns[@]}  ; do
         # create image README.md
         # create image README.md
 		
-        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/${user_name}/${img}/tags/) \n\n----" >> gcr.io_mirror/${n}/README.md
-        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/${user_name}/${img}/tags/) \n\n----" > gcr.io_mirror/${n}/${img}/README.md
+        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/) \n\n----" >> gcr.io_mirror/${n}/README.md
+        echo -e "[gcr.io/${n}/${img}](https://hub.docker.com/r/${user_name}/${n}.${img}/tags/) \n\n----" > gcr.io_mirror/${n}/${img}/README.md
 		
         # create img tmp file,named by tag's name, set access's time,modify's time by this image manifest's timeUploadedMs
         echo ${gcr_content} | jq -r '.manifest[]|{k: .tag[0],v: .timeUploadedMs} | "touch -amd \"$(date -d @" + .v[0:10] +")\" gcr.io_mirror\/${n}\/${img}\/"  +.k' | while read i; do
