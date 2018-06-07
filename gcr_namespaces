@@ -1,4 +1,5 @@
-kubernetes-helm
-tf-on-k8s-dogfood
-spinnaker-marketplace
 google-containers
+k8s-minikube
+kubernetes-helm
+spinnaker-marketplace
+tf-on-k8s-dogfood
