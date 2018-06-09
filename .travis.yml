@@ -2,8 +2,11 @@ services:
   - docker
 script:
   - docker login -u${user_name} -p${pass_word}
-  - chmod +x ./deploy.sh
-  - ./deploy.sh
+  #- chmod +x ./deploy.sh
+  #- ./deploy.sh
+  - chmod +x ./processor-utils.sh
+  - ./processor-utils.sh --daemon
+  - ./processor-utils.sh --add hello world
 branches:
   only:
     - sync
