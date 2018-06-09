@@ -7,6 +7,7 @@ script:
   - chmod +x ./processor-utils.sh
   - ./processor-utils.sh --daemon
   - ./processor-utils.sh --add hello world
+  - sleep 5 && cat ./processor-utils.log
 branches:
   only:
     - sync
