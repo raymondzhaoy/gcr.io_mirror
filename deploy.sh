@@ -106,7 +106,7 @@ function mirror()
   for img in ${tmps[@]} ; do
     n=$(echo ${img}|cut -d'/' -f1)
     image=$(echo ${img}|cut -d'/' -f2)
-    ./process-utils.sh -a "pull_push_diff $n $image"
+    process_run "pull_push_diff $n $image"
   done
   
   wait
@@ -126,17 +126,18 @@ function mirror()
     
     echo -e "[gcr.io/${n}/{image}:${tag}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/{image}/README.md
   done
+  commit
 }
 
 function commit()
 {
   ns=($(cat ./gcr_namespaces 2>/dev/null || echo google-containers))
   readme=${./gcr.io_mirror/README.md}
-  envsubst < README.tpl >${readme}
+  envsubst < README.tpl >"${readme}"
   
-  echo -e "Mirror ${#ns[@]} namespaces image from gcr.io\n-----\n\n" >> ${readme}
+  echo -e "Mirror ${#ns[@]} namespaces image from gcr.io\n-----\n\n" >> "${readme}"
   for n in ${ns[@]} ; do
-    echo echo -e "[gcr.io/${n}/*](./${n}/README.md)\n\n" >> ${readme}
+    echo echo -e "[gcr.io/${n}/*](./${n}/README.md)\n\n" >> "${readme}"
   done
   
   git -C ./gcr.io_mirror add .
