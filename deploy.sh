@@ -118,7 +118,7 @@ function mirror()
     n=$(echo ${img}|cut -d'/' -f3)
     image=$(echo ${img}|cut -d'/' -f4)
     tag=$(echo ${img}|cut -d'/' -f5)
-    
+    mkdir -p ./gcr.io_mirror/${n}/{image}
     if [ ! -f ./gcr.io_mirror/${n}/{image}/README.md ]; then
       echo -e "[gcr.io/${n}/{image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/{image}/README.md
       echo -e "[gcr.io/${n}/{image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/README.md
