@@ -132,7 +132,7 @@ function mirror()
 function commit()
 {
   ns=($(cat ./gcr_namespaces 2>/dev/null || echo google-containers))
-  readme=${./gcr.io_mirror/README.md}
+  readme=./gcr.io_mirror/README.md
   envsubst < README.tpl >"${readme}"
   
   echo -e "Mirror ${#ns[@]} namespaces image from gcr.io\n-----\n\n" >> "${readme}"
