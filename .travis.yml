@@ -1,13 +1,6 @@
 services:
   - docker
-script:
+before_install:
   - docker login -u${user_name} -p${pass_word}
-  #- chmod +x ./deploy.sh
-  #- ./deploy.sh
-  - chmod +x ./processor-utils.sh
-  - ./processor-utils.sh --daemon
-  - ./processor-utils.sh --add hello world
-  - sleep 5 && cat ./processor-utils.log
-branches:
-  only:
-    - sync
+  - chmod +x ./deploy.sh
+  - ./deploy.sh
