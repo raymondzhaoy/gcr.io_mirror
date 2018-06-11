@@ -2,8 +2,8 @@
 # clone master branch
 SECONDS=0
 
-#source ./process-utils.sh
-#process_init 2
+source ./process-utils.sh
+process_init 20
 
 [[ ! -d "gcr.io_mirror" ]] && git clone "https://github.com/anjia0532/gcr.io_mirror.git"
 
