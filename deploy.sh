@@ -125,8 +125,8 @@ function mirror()
     tag=$(echo ${img}|cut -d'/' -f5)
     mkdir -p ./gcr.io_mirror/${n}/{image}
     if [ ! -f ./gcr.io_mirror/${n}/{image}/README.md ]; then
-      echo -e "[gcr.io/${n}/{image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/{image}/README.md
-      echo -e "[gcr.io/${n}/{image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/README.md
+      echo -e "\n[gcr.io/${n}/{image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/{image}/README.md
+      echo -e "\n[gcr.io/${n}/{image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/README.md
     fi
     
     echo -e "[gcr.io/${n}/{image}:${tag}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/{image}/README.md
