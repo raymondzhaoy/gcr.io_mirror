@@ -1,8 +1,9 @@
+#!/bin/bash
 # clone master branch
 SECONDS=0
 
-source ./process-utils.sh
-process_init 2
+#source ./process-utils.sh
+#process_init 2
 
 [[ ! -d "gcr.io_mirror" ]] && git clone "https://github.com/anjia0532/gcr.io_mirror.git"
 
@@ -30,6 +31,7 @@ function init_namespace()
 
   for img in ${imgs[@]}  ; do
    process_run "init_imgs $img"
+   #init_imgs $img
   done
 }
 
@@ -99,6 +101,7 @@ function mirror()
     ns=$(cat ./gcr_namespaces 2>/dev/null || echo google-containers)
     for n in ${ns[@]}  ; do
       process_run "init_namespace $n"
+      #init_namespace $n
     done
     wait
   fi
@@ -108,6 +111,7 @@ function mirror()
     n=$(echo ${img}|cut -d'/' -f1)
     image=$(echo ${img}|cut -d'/' -f2)
     process_run "pull_push_diff $n $image"
+    #pull_push_diff $n $image
   done
   
   wait
@@ -144,7 +148,6 @@ function commit()
   git -C ./gcr.io_mirror add .
   git -C ./gcr.io_mirror commit -m "sync gcr.io's images at $(date +'%Y-%m-%d %H:%M')"
   git -C ./gcr.io_mirror push --quiet "https://${GH_TOKEN}@github.com/${user_name}/gcr.io_mirror.git" master:master
-  #curl 'https://api.travis-ci.org/repo/16177067/requests' -H 'Travis-API-Version: 3' -H 'Authorization: token ${travis_token}' --data-binary '{"request":{"branch":"sync","config":"autobuild","message":"autobuild"}}'
 }
 
 mirror &
@@ -152,8 +155,10 @@ mirror &
 while true;
 do
   duration=$SECONDS
-  if [ $duration -ge 5 ]; then
-    commit && exit 0
+  if [ $duration -ge 2400 ]; then
+    commit
+    curl 'https://api.travis-ci.org/repo/16177067/requests' -H 'Travis-API-Version: 3' -H 'Authorization: token ${travis_token}' --data-binary '{"request":{"branch":"sync","config":"autobuild","message":"autobuild"}}'
+    exit 0
   else
     sleep 60
   fi
