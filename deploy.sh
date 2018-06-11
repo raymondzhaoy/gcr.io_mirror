@@ -2,7 +2,7 @@
 SECONDS=0
 
 source ./process-utils.sh
-process_init 20
+process_init 2
 
 [[ ! -d "gcr.io_mirror" ]] && git clone "https://github.com/anjia0532/gcr.io_mirror.git"
 
@@ -32,6 +32,7 @@ function init_namespace()
    process_run "init_imgs $img"
   done
 }
+
 function init_imgs()
 {
   img=$1
