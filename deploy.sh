@@ -143,7 +143,7 @@ function commit()
   git -C ./gcr.io_mirror add .
   git -C ./gcr.io_mirror commit -m "sync gcr.io's images at $(date +'%Y-%m-%d %H:%M')"
   git -C ./gcr.io_mirror push --quiet "https://${GH_TOKEN}@github.com/${user_name}/gcr.io_mirror.git" master:master
-  curl 'https://api.travis-ci.org/repo/16177067/requests' -H 'Travis-API-Version: 3' -H 'Authorization: token ${travis_token}' --data-binary '{"request":{"branch":"sync","config":"autobuild","message":"autobuild"}}'
+  #curl 'https://api.travis-ci.org/repo/16177067/requests' -H 'Travis-API-Version: 3' -H 'Authorization: token ${travis_token}' --data-binary '{"request":{"branch":"sync","config":"autobuild","message":"autobuild"}}'
 }
 
 mirror &
