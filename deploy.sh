@@ -61,10 +61,10 @@ function compare()
   do
     dir=$(dirname $t)
     name=$(basename $t .tmp)
-    if [ -f ${dir}/${name} ] && [ $(cat ${dir}/${name})x = $(cat $t)x ]; then
+    if [ -f ${dir}/${name}.tag ] && [ $(cat ${dir}/${name}.tag)x = $(cat $t)x ]; then
       rm -rf $t;
     else
-      [[ -f ${dir}/${name} ]] && rm -rf ${dir}/${name}
+      [[ -f ${dir}/${name}.tag ]] && rm -rf ${dir}/${name}.tag
     fi
   done
 }
@@ -77,7 +77,7 @@ function pull_push_diff()
   current_ns_imgs=$(find ./gcr.io_mirror/${n}/ -type f \( ! -iname "*.md" \) |wc -l)
   tmps=($(find ./gcr.io_mirror/${n}/${img}/ -type f \( -iname "*.tmp" \) -exec basename {} .tmp \; | uniq))
   
-  echo -e "${user_name}${red}wait for mirror${plain}/${yellow}gcr.io/${n}/* images${plain}/${green}all of images${plain}:${red}${#tmps[@]}${plain}/${yellow}${current_ns_imgs}${plain}/${green}${all_of_imgs}${plain}"
+  echo -e "${red}wait for mirror${plain}/${yellow}gcr.io/${n}/* images${plain}/${green}all of images${plain}:${red}${#tmps[@]}${plain}/${yellow}${current_ns_imgs}${plain}/${green}${all_of_imgs}${plain}"
   
   for tag in ${tmps[@]} ; do
     echo -e "${yellow}mirror ${n}/${img}/${tag}...${plain}"
@@ -89,7 +89,7 @@ function pull_push_diff()
     docker tag gcr.io/${n}/${img}:${tag} ${user_name}/${n}.${img}:${tag}
     docker push ${user_name}/${n}.${img}:${tag}
     
-    mv ./gcr.io_mirror/${n}/${img}/${tag}.tmp ./gcr.io_mirror/${n}/${img}/${tag}
+    mv ./gcr.io_mirror/${n}/${img}/${tag}.tmp ./gcr.io_mirror/${n}/${img}/${tag}.tag
     
     echo gcr.io/${n}/${img}:${tag} >> CHANGES.md
     rm -rf $lock
@@ -123,21 +123,21 @@ function mirror()
   
   wait ${!}
   
-  images=($(find ./gcr.io_mirror/ -type f -name "*" -not \( -path "./gcr.io_mirror/.git/*" -o -path "*.md" -o -path "*/LICENSE" -o -path "*.md" -o -path "*.tmp" -o -path "*.lck" \)|uniq|sort))
+  images=($(find ./gcr.io_mirror/ -type f -name "*.tag" |uniq|sort))
+  
   find ./gcr.io_mirror/ -type f -name "*.md" -exec rm -rf {} \;
-  
-  
+    
   for img in ${images[@]} ; do
     n=$(echo ${img}|cut -d'/' -f3)
     image=$(echo ${img}|cut -d'/' -f4)
     tag=$(echo ${img}|cut -d'/' -f5)
     mkdir -p ./gcr.io_mirror/${n}/${image}
     if [ ! -f ./gcr.io_mirror/${n}/${image}/README.md ]; then
-      echo -e "\n[gcr.io/${n}/${image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/${image}/README.md
-      echo -e "\n[gcr.io/${n}/${image}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/README.md
+      echo -e "\n[gcr.io/${n}/${image}](https://hub.docker.com/r/${user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/${image}/README.md
+      echo -e "\n[gcr.io/${n}/${image}](https://hub.docker.com/r/${user_name}/${n}.${image}/tags/)\n-----\n\n" >> ./gcr.io_mirror/${n}/README.md
     fi
     
-    echo -e "[gcr.io/${n}/${image}:${tag}](https://hub.docker.com/r/{user_name}/${n}.${image}/tags/)\n\n" >> ./gcr.io_mirror/${n}/${image}/README.md
+    echo -e "[gcr.io/${n}/${image}:${tag}](https://hub.docker.com/r/${user_name}/${n}.${image}/tags/)\n\n" >> ./gcr.io_mirror/${n}/${image}/README.md
   done
   
   commit
@@ -152,7 +152,7 @@ function commit()
   
   echo -e "Mirror ${#ns[@]} namespaces image from gcr.io\n-----\n\n" >> "${readme}"
   for n in ${ns[@]} ; do
-    echo echo -e "[gcr.io/${n}/*](./${n}/README.md)\n\n" >> "${readme}"
+    echo -e "[gcr.io/${n}/*](./${n}/README.md)\n\n" >> "${readme}"
   done
   
   git -C ./gcr.io_mirror add .
@@ -172,7 +172,8 @@ do
   else
     docker_dir=$(docker info | grep "Docker Root Dir" | cut -d':' -f2)
     used=$(df -h ${docker_dir}|awk '{if(NR>1)print $5}')
+    echo -e "${red} docker root dir :${docker_dir}:used:${used}"
     [[ ${used} > '70%' ]] && docker system prune -f -a
-    sleep 60
+    sleep 30
   fi
 done
